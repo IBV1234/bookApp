@@ -1,5 +1,5 @@
 import { User,Book } from '../lib/types/data';
-import { DbBook,DbUser } from './db/model';
+import { DbUser } from './db/model';
 
 export async function addUser(user: User): Promise<boolean>  {
     try {
