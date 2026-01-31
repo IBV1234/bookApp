@@ -15,6 +15,8 @@ export type Book = {
     type: 'periodique' | 'bd' | 'livre';
 }
 
+
+
 export type User = {
     _id?: string;
     name: string;

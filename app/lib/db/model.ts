@@ -3,17 +3,6 @@ import mongoose, { Schema, Model } from "mongoose";
 function getModel<T>(name: string, schema: Schema<T>): Model<T> {
     return (mongoose.models?.[name] as Model<T>) || mongoose.model<T>(name, schema)
 }
-// const bookSchema = new Schema({
-//     title: { type: String, required: true },
-//     author: { type: String, required: true },
-//     publishedYear: { type: Number, required: true },
-//     pages: { type: Number, required: true },
-//     type: { type: String, required: true }
-
-// }, { collection: 'books' });
-
-// export const DbBook = getModel('Book', bookSchema);
-
 
 const bookSubSchema = new Schema({
   title: { type: String, required: true },
@@ -30,6 +19,7 @@ const bookSubSchema = new Schema({
 }, { _id: false });
 
 const userSchema = new Schema({
+  _id: { type: String, required: false },
   name: { type: String, required: true },
   username: { type: String, required: true, unique: true },
   booksWritten: { type: [bookSubSchema], default: [] }

@@ -3,11 +3,15 @@ import { z } from "zod";
 import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import styles from "./formComponent.module.css";
+import styles from "./style/formComponent.module.css";
 import { userShema } from "../lib/types/data";
-export default function FormComponent() {
+import {useRouter} from "next/navigation";
 
+
+export default function FormComponent() {
+    const [loading, setLoading] = useState(false);
     const [showInputToAddBook, setShowInputToAddBook] = useState(false);
+    const router = useRouter();
 
     type UserForm = z.infer<typeof userShema>;
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm<UserForm>({
@@ -15,11 +19,18 @@ export default function FormComponent() {
         mode: "onSubmit",
     });
 
+    /**
+     * @useFieldArray  pour gérer dynamiquement un tableau de champs appelé "booksWritten".
+     * @control Passe le contrôle du formulaire pour que React Hook Form gère ce tableau
+     * @fields : @booksWrittenFields : Un tableau contenant tous les champs actuels. Chaque élément a un id unique
+     */
+
     const { fields: booksWrittenFields, append, remove } = useFieldArray({
         name: "booksWritten",
         control: control,
     });
     console.log("Books Written Fields: ", booksWrittenFields.length);
+
 
     const onSubmit = async (user: UserForm) => {
         console.log("Form Data Submitted: ", user);
@@ -27,6 +38,8 @@ export default function FormComponent() {
             console.log("Erreur de validation: ", errors);
             return;
         }
+
+        setLoading(true);
         let response = null;
         try {
             response = await fetch('/api/clients', {
@@ -40,14 +53,18 @@ export default function FormComponent() {
             console.error("Submission error: ", e);
         }
 
-        if (!response) {
+        setLoading(false);
+        if (!response?.ok) {
             reset(undefined, {
                 keepErrors: true,
             });
             return;
         }
+        router.push('/home');
 
     }
+
+
     useEffect(() => {
         console.log("showInputToAddBook ", showInputToAddBook);
     }, [showInputToAddBook]);
@@ -55,7 +72,7 @@ export default function FormComponent() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-2xl gap-5 w-full max-w-md sm:h-auto mx-auto p-8 shadow-2xl">
-            <h2 className="text-2xl font-bold mb-4 text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Connexion</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Formulaire d'ajout de client et de livre</h2>
 
             <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-300">Nom</label>
@@ -123,9 +140,10 @@ export default function FormComponent() {
                             )}
 
                              <input
-                                {...register(`booksWritten.${index}.detail.publishedYear` as const)}
+                                {...register(`booksWritten.${index}.detail.publishedYear` as const, { valueAsNumber: true })}
                                 placeholder="Année de publication du livre écrit"
                                 className={styles.input}
+                                type="number"
                             />
                             {errors.booksWritten && errors.booksWritten[index]?.detail?.publishedYear && (
                                 <span className="text-red-500 text-sm">{errors.booksWritten[index].detail.publishedYear.message}</span>
@@ -180,7 +198,7 @@ export default function FormComponent() {
                 </div>
             )}
 
-            <button type="submit" className={styles.button}>Soumettre</button>
+            <button type="submit" className={styles.button}>{loading ? "En cours..." : "Soummettre"}</button>
         </form>
     )
 } {/* <select {...register("booksWritten")} className={styles.input}>
@@ -190,7 +208,3 @@ export default function FormComponent() {
                 <option value="livre3">Livre 3</option>
               </select> */}
 
-{/* <button className ={styles.button} type="button"  onClick={() =>
-                    append({ title: "", detail: { author: "",publishedYear: 0, maisonEdition: "", dessinator: "", periodicite: "" }, dispo: 0, prix: 0, type: 'livre' })}>
-                    Ajouter un livre écrit
-                </button> */}

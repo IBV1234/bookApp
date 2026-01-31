@@ -1,57 +1,55 @@
-import { User,Book } from '../lib/types/data';
+import { User, Book } from '../lib/types/data';
 import { DbUser } from './db/model';
 
-export async function addUser(user: User): Promise<boolean>  {
+export async function addUser(user: User): Promise<boolean> {
     try {
-        console.log("user addUser:",user);  
-         await DbUser.create(user);
-        const  findedUser = await DbUser.findOne({username: user.username});
-        if(!findedUser){
-            console.error("Error finding the newly created user.");
-            return false; 
+        const findedUser = await DbUser.findOne({ username: user.username });
+        if (!findedUser) {
+                    console.log("user :", user);
+
+            await DbUser.create(user);
         }
-        console.log("Document written with ID: ", findedUser._id);
+        await addBooksToUser(user);
         return true;
-    }catch (e) {
+    } catch (e) {
         console.error("Error adding document: ", e);
         return false;
     }
 }
 
 
-// export async function addBooks(books: Book): Promise<boolean>  {
-//     try {
-     
-//         // console.log("Document written with ID: ", docRef.id);
-//         return true;
-//         } catch (e) {
-//         console.error("Error adding document: ", e);
-//         return false;
-//     }
-// }
+export async function addBooksToUser(user: User): Promise<boolean> {
+    try {
+       const updatedUser = await DbUser.findOneAndUpdate(
+            { username: user.username },
+            { $push: { booksWritten: { $each: user.booksWritten || [] } } },//$each to add multiple books at once
+            { new: true } // Return the updated document
+
+        );
+         console.log("Document updated: ", updatedUser);
+        return true;
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        return false;
+    }
+}
 
 
-// export async function getUserByUserName(clientName: string): Promise<unknown | null> {
- 
-//     return null;
-// }
+export async function getBook(): Promise<Book[]> {
+    try {
+        console.log("books:");
 
-// export async function updateUser(docId: string, data: Partial<User>): Promise<boolean> {
-//     try {
-        
-//     }
-//     catch (error) {
-//         console.error("Error updating document: ", error);
-//         return false;
-//     }
-// }
-
-// export async function deleteUsers( docId:string|number) :Promise<boolean>{
-//     try {
-    
-//     } catch (error) {
-//         console.error("Error deleting document: ", error);
-//         return false;
-//     }
-// }
-
+        const booksUers = await DbUser.find();
+        console.log("books:", booksUers);
+        const books: Book[] = booksUers.flatMap((u: User) => u.booksWritten ?? []);
+        console.log("books detailBook:", books);
+        if (!books || books.length === 0) {
+            console.log("No books found in the database.");
+            return [];
+        }
+        return books;
+    } catch (error) {
+        console.error("Error fetching books:", error);
+        throw error;
+    }
+}   

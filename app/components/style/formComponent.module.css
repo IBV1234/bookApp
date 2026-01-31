@@ -1,28 +1,28 @@
 .input {
-  background-color: #1F2937; /* gray-800 */
+  background-color: #1F2937; 
   color: white;
-  border: 2px solid #374151; /* gray-700 */
+  border: 2px solid #374151; 
   padding: 0.875rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: 20px;
   width: 100%;
-  font-size: 1rem;
+  font-size: 10px;
   transition: all 0.3s ease;
-  font-family: inherit;
+  font-size: 15px;
 }
 
 .input::placeholder {
-  color: #9CA3AF; /* gray-400 */
+  color: #9CA3AF; 
 }
 
 .input:focus {
   outline: none;
-  border-color: #3B82F6; /* blue-500 */
-  background-color: #111827; /* gray-900 */
+  border-color: #3B82F6; 
+  background-color: #111827; 
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .input:hover:not(:focus) {
-  border-color: #4B5563; /* gray-600 */
+  border-color: #4B5563; 
 }
 
 .button {
@@ -37,7 +37,6 @@
   font-weight: 600;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-  font-family: inherit;
 }
 
 .button:hover {

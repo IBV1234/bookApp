@@ -14,7 +14,6 @@ export default function Home() {
       justifyContent: 'center'
     }}>
       <main className="flex w-full h-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="font-sans text-2xl my-20"> Books.com </h1>
         <FormComponent />
       </main>
     </div>

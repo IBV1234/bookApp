@@ -1,0 +1,187 @@
+"use client"
+import React, { useState, useMemo, useEffect } from "react";
+import { Book, User, detailBook } from "../lib/types/data";
+import { useRouter } from "next/navigation";
+import styles from "./style/booksPage.module.css";
+// const MOCK_BOOKS: Book[] = [
+//     {
+//         title: "Les Misérables",
+//         detail: {
+//             author: "Victor Hugo",
+//             publishedYear: 1862,
+//             maisonEdition: "Hachette",
+//             dessinator: "N/A",
+//             periodicite: "Unique"
+//         },
+//         dispo: 5,
+//         prix: 15.99,
+//         type: "livre"
+//     },
+//     {
+//         title: "Le Seigneur des Anneaux",
+//         detail: {
+//             author: "J.R.R. Tolkien",
+//             publishedYear: 1954,
+//             maisonEdition: "Allen & Unwin",
+//             periodicite: "Trilogie"
+//         },
+//         dispo: 3,
+//         prix: 29.99,
+//         type: "livre"
+//     },
+//     {
+//         title: "Tintin au Pays de l'Or Noir",
+//         detail: {
+//             author: "Hergé",
+//             publishedYear: 1950,
+//             maisonEdition: "Casterman",
+//             dessinator: "Hergé",
+//             periodicite: "Album"
+//         },
+//         dispo: 8,
+//         prix: 12.99,
+//         type: "bd"
+//     },
+//     {
+//         title: "Le Monde Diplomatique",
+//         detail: {
+//             author: "Collectif",
+//             publishedYear: 2024,
+//             maisonEdition: "Le Monde Diplomatique",
+//             periodicite: "Mensuel"
+//         },
+//         dispo: 15,
+//         prix: 6.99,
+//         type: "periodique"
+//     }
+// ];
+
+export default function BooksPage() {
+    const [books, setBooks] = useState<Book[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const router = useRouter();
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                console.log('Fetched books from API:', data);
+                if (!data || data[0].length === 0) {
+                    console.error('Failed to fetch books:', data.error);
+                    return;
+                }
+                setBooks(data);
+            } catch (error) {
+                console.error('Error fetching books:', error);
+            }
+        };
+
+        fetchBooks();
+    }, []);
+
+
+
+    const filteredBooks = useMemo(() => {
+        return books.filter(book =>
+            book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            book.detail.dessinator?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            book.type?.toLowerCase().includes(searchQuery.toLowerCase())
+        ).sort((a, b) => b.prix - a.prix);
+    }, [books, searchQuery]);
+
+    return (
+        <div className={styles.container}>
+            <h1 className={styles.title}>📚 Bibliothèque</h1>
+
+            <div className={styles.searchContainer}>
+                <input
+                    type="text"
+                    placeholder="Rechercher par titre, auteur ou type..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={styles.searchInput}
+                />
+            </div>
+
+            {filteredBooks.length === 0 ? (
+                <div className={styles.noResults}>
+                    <p>Aucun livre trouvé pour: <strong>{searchQuery}</strong></p>
+                </div>
+            ) : (
+                <div className={styles.booksGrid}>
+                    {filteredBooks.map((book, index) => (
+                        <div key={index} className={styles.bookCard}>
+                            <div className={styles.bookHeader}>
+                                <h2 className={styles.bookTitle}>{book.title}</h2>
+                                <span className={`${styles.badge} ${styles[book.type]}`}>
+                                    {book.type}
+                                </span>
+                            </div>
+
+                            <div className={styles.bookDetails}>
+                                <div className={styles.detailRow}>
+                                    <span className={styles.label}>Auteur:</span>
+                                    <span>{book.detail.author}</span>
+                                </div>
+
+                                {book.detail.dessinator && (
+                                    <div className={styles.detailRow}>
+                                        <span className={styles.label}>Dessinateur:</span>
+                                        <span>{book.detail.dessinator}</span>
+                                    </div>
+                                )}
+
+                                <div className={styles.detailRow}>
+                                    <span className={styles.label}>Maison d'édition:</span>
+                                    <span>{book.detail.maisonEdition}</span>
+                                </div>
+
+                                <div className={styles.detailRow}>
+                                    <span className={styles.label}>Année:</span>
+                                    <span>{book.detail.publishedYear}</span>
+                                </div>
+
+                                {book.detail.periodicite && (
+                                    <div className={styles.detailRow}>
+                                        <span className={styles.label}>Périodicité:</span>
+                                        <span>{book.detail.periodicite}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.bookFooter}>
+                                <div className={styles.priceStock}>
+                                    <div className={styles.price}>
+                                        <span className={styles.label}>Prix:</span>
+                                        <span className={styles.priceValue}>{book.prix}€</span>
+                                    </div>
+                                    <div className={`${styles.availability} ${book.dispo > 0 ? styles.available : styles.unavailable}`}>
+                                        <span className={styles.label}>Stock:</span>
+                                        <span>{book.dispo}</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="flex justify-center items-center w-[200px] h-[60px] mx-auto mt-30">
+                <button type="button" className={styles.button} onClick={() => router.push("/")}> Ajouter un livre </button>
+
+            </div>
+        </div>
+    );
+}
+
+/**
+ * @styles [book.type] Accès dynamique à une classe CSS basée sur la valeur de book.type
+ */
