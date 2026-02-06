@@ -1,8 +1,10 @@
 "use client"
-import React, { useState, useMemo, useEffect } from "react";
-import { Book, User, detailBook } from "../lib/types/data";
+import React, { useState, useMemo, useEffect, use } from "react";
+import { Book } from "../lib/types/data";
 import { useRouter } from "next/navigation";
 import styles from "./style/booksPage.module.css";
+import { fi } from "zod/locales";
+import { set } from "mongoose";
 // const MOCK_BOOKS: Book[] = [
 //     {
 //         title: "Les Misérables",
@@ -59,6 +61,7 @@ import styles from "./style/booksPage.module.css";
 export default function BooksPage() {
     const [books, setBooks] = useState<Book[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [filteredBooksState, setFilteredBooksState] = useState<{ type: string, books: Book[] }>({ type: "", books: [] });
 
     const router = useRouter();
     useEffect(() => {
@@ -77,6 +80,7 @@ export default function BooksPage() {
                     return;
                 }
                 setBooks(data);
+                setFilteredBooksState({ type: "", books: data });
             } catch (error) {
                 console.error('Error fetching books:', error);
             }
@@ -86,14 +90,42 @@ export default function BooksPage() {
     }, []);
 
 
+  
+
+
+
+    const getValueSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const { value } = e.target;
+        setFilteredBooksState({ ...filteredBooksState, type: value.trim() });
+
+    }
 
     const filteredBooks = useMemo(() => {
-        return books.filter(book =>
-            book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            book.detail.dessinator?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            book.type?.toLowerCase().includes(searchQuery.toLowerCase())
-        ).sort((a, b) => b.prix - a.prix);
-    }, [books, searchQuery]);
+        return filteredBooksState.books.filter(book => {
+              if ((filteredBooksState.type.toLowerCase() === "tous les types"|| filteredBooksState.type === "") && searchQuery === "") { // Si on veut tous les livres et qu'il n'y a pas de recherche
+                return filteredBooksState.books;
+            }
+            else if (filteredBooksState.type !== "" && searchQuery === "") { // Sil y a un type sélectionné mais pas de recherche
+                return book.type.toLowerCase() === filteredBooksState.type.toLowerCase()
+
+            }
+            else if (filteredBooksState.type.toLowerCase() === "bd" && searchQuery !== "") {// Si y a un type  BD de sélectionné  qui n'est pas tous les livres et qu'on recherche  un dessinator
+                return book.detail.dessinator?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                     book.type.toLowerCase() === filteredBooksState.type.toLowerCase()
+
+
+            } else if (filteredBooksState.type !== "" && filteredBooksState.type.toLowerCase() !== "tous les types" && searchQuery !== "") {// Si y a un type sélectionné et une recherche qui n'est pas tous les livres , qui n'est pas un bd et qu'on recherche un auteur ou un titre
+                return book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    book.detail.author?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                    (filteredBooksState.type.toLowerCase() !== "bd" && book.type.toLowerCase() === filteredBooksState.type.toLowerCase())
+
+
+            }
+          
+        }).sort((a, b) => b.prix - a.prix);
+
+    }, [filteredBooksState, searchQuery]);
+ 
 
     return (
         <div className={styles.container}>
@@ -102,11 +134,23 @@ export default function BooksPage() {
             <div className={styles.searchContainer}>
                 <input
                     type="text"
-                    placeholder="Rechercher par titre, auteur ou type..."
+                    placeholder="Rechercher par titre, auteur, dessinateur..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={styles.searchInput}
                 />
+
+
+            </div>
+
+            <div className={styles.searchSelect}>
+                <select onChange={getValueSelect}>
+                    <option  defaultValue={"all"}>Tous les types</option>
+                    <option value="livre">Livre</option>
+                    <option value="bd">BD</option>
+                    <option value="periodique">Périodique</option>
+
+                </select>
             </div>
 
             {filteredBooks.length === 0 ? (
@@ -159,7 +203,7 @@ export default function BooksPage() {
                                 <div className={styles.priceStock}>
                                     <div className={styles.price}>
                                         <span className={styles.label}>Prix:</span>
-                                        <span className={styles.priceValue}>{book.prix}€</span>
+                                        <span className={styles.priceValue}>{book.prix}$</span>
                                     </div>
                                     <div className={`${styles.availability} ${book.dispo > 0 ? styles.available : styles.unavailable}`}>
                                         <span className={styles.label}>Stock:</span>
