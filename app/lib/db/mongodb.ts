@@ -6,9 +6,7 @@ if (!MONGODB_URI) {
   throw new Error("Please define MONGODB_URI in .env.local");
 }
 
-// Global is required to prevent multiple connections in dev same thins as windows variable
-//Global is used here to maintain a cached connection across hot reloads in development it's like a singleton
-// Otherwise, a new connection is created on every request which can exhaust database connections
+//cached :singleton
 let cached = (global as any).mongoose;
 
 if (!cached) {
@@ -23,14 +21,14 @@ export async function mongoConnection(): Promise<mongoose.Connection|undefined> 
     return cached.conn;
   }
 
-  if (!cached.promise) {
+  if (!cached.promise) {//Évite les connexions multiples
     if (MONGODB_URI) {
       cached.promise = mongoose
         .connect(MONGODB_URI)
         .then((mongoose) => mongoose.connection);
     }
 
-    cached.conn = await cached.promise;
+    cached.conn = await cached.promise;//Attend la promesse de connexion
     console.log("MongoDB connected");
 
     return cached.conn;

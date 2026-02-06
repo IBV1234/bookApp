@@ -3,60 +3,6 @@ import React, { useState, useMemo, useEffect, use } from "react";
 import { Book } from "../lib/types/data";
 import { useRouter } from "next/navigation";
 import styles from "./style/booksPage.module.css";
-import { fi } from "zod/locales";
-import { set } from "mongoose";
-// const MOCK_BOOKS: Book[] = [
-//     {
-//         title: "Les Misérables",
-//         detail: {
-//             author: "Victor Hugo",
-//             publishedYear: 1862,
-//             maisonEdition: "Hachette",
-//             dessinator: "N/A",
-//             periodicite: "Unique"
-//         },
-//         dispo: 5,
-//         prix: 15.99,
-//         type: "livre"
-//     },
-//     {
-//         title: "Le Seigneur des Anneaux",
-//         detail: {
-//             author: "J.R.R. Tolkien",
-//             publishedYear: 1954,
-//             maisonEdition: "Allen & Unwin",
-//             periodicite: "Trilogie"
-//         },
-//         dispo: 3,
-//         prix: 29.99,
-//         type: "livre"
-//     },
-//     {
-//         title: "Tintin au Pays de l'Or Noir",
-//         detail: {
-//             author: "Hergé",
-//             publishedYear: 1950,
-//             maisonEdition: "Casterman",
-//             dessinator: "Hergé",
-//             periodicite: "Album"
-//         },
-//         dispo: 8,
-//         prix: 12.99,
-//         type: "bd"
-//     },
-//     {
-//         title: "Le Monde Diplomatique",
-//         detail: {
-//             author: "Collectif",
-//             publishedYear: 2024,
-//             maisonEdition: "Le Monde Diplomatique",
-//             periodicite: "Mensuel"
-//         },
-//         dispo: 15,
-//         prix: 6.99,
-//         type: "periodique"
-//     }
-// ];
 
 export default function BooksPage() {
     const [books, setBooks] = useState<Book[]>([]);
@@ -105,7 +51,7 @@ export default function BooksPage() {
             if ((filteredBooksState.type.toLowerCase() === "tous les types" || filteredBooksState.type === "") && searchQuery === "") { // Si on veut tous les livres et qu'il n'y a pas de recherche
                 return filteredBooksState.books;
             }
-            else if ((filteredBooksState.type.toLowerCase() === "tous les types" || filteredBooksState.type === "") && searchQuery !== "") {
+            else if ((filteredBooksState.type.toLowerCase() === "tous les types" || filteredBooksState.type === "") && searchQuery !== "") {// Si on veut tous les livres et qu'on fait une recherche
 
                 return book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     book.detail.author?.toLowerCase().includes(searchQuery.toLowerCase())
