@@ -18,7 +18,7 @@ export type Book = {
 
 
 export type User = {
-    _id?: string;
+    _id?: string|undefined;
     name: string;
     username: string;
     booksWritten?: Book[];

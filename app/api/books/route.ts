@@ -1,7 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getBook} from '@/app/lib/data';
 import mongoConnection from '@/app/lib/db/mongodb';
-import { User,Book } from '@/app/lib/types/data';
 
 // export async function POST(request: NextRequest) {
 //     try {

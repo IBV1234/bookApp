@@ -19,7 +19,6 @@ const bookSubSchema = new Schema({
 }, { _id: false });
 
 const userSchema = new Schema({
-  _id: { type: String, required: false },
   name: { type: String, required: true },
   username: { type: String, required: true, unique: true },
   booksWritten: { type: [bookSubSchema], default: [] }

@@ -5,9 +5,10 @@ export async function addUser(user: User): Promise<boolean> {
     try {
         const findedUser = await DbUser.findOne({ username: user.username });
         if (!findedUser) {
-                    console.log("user :", user);
+            console.log("user :", user);
 
             await DbUser.create(user);
+            return true;
         }
         await addBooksToUser(user);
         return true;
@@ -20,13 +21,13 @@ export async function addUser(user: User): Promise<boolean> {
 
 export async function addBooksToUser(user: User): Promise<boolean> {
     try {
-       const updatedUser = await DbUser.findOneAndUpdate(
+        const updatedUser = await DbUser.findOneAndUpdate(
             { username: user.username },
             { $push: { booksWritten: { $each: user.booksWritten || [] } } },//$each to add multiple books at once
             { new: true } // Return the updated document
 
         );
-         console.log("Document updated: ", updatedUser);
+        console.log("Document updated: ", updatedUser);
         return true;
     } catch (e) {
         console.error("Error adding document: ", e);
