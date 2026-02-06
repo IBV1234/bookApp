@@ -12,7 +12,7 @@ export type Book = {
     detail: detailBook;
     dispo: number;
     prix: number;
-    type: 'periodique' | 'bd' | 'livre';
+    type: 'périodique' | 'bd' | 'livre';
 }
 
 
@@ -26,7 +26,7 @@ export type User = {
 
 export const userShema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters long").transform(val => val.trim()),
-    username: z.string().min(3, "Username must be at least 3 characters long").transform(val => val.trim()),
+    username: z.string().min(2, "Username must be at least 2 characters long").transform(val => val.trim()),
 
     booksWritten: z.array(z.object({
         title: z.string(),
@@ -40,7 +40,7 @@ export const userShema = z.object({
 
         dispo: z.number(),
         prix: z.number(),
-        type: z.enum(['periodique', 'bd', 'livre']),
+        type: z.enum(['périodique', 'bd', 'livre']),
     })).optional(),
 
 })

@@ -90,7 +90,7 @@ export default function BooksPage() {
     }, []);
 
 
-  
+
 
 
 
@@ -102,30 +102,36 @@ export default function BooksPage() {
 
     const filteredBooks = useMemo(() => {
         return filteredBooksState.books.filter(book => {
-              if ((filteredBooksState.type.toLowerCase() === "tous les types"|| filteredBooksState.type === "") && searchQuery === "") { // Si on veut tous les livres et qu'il n'y a pas de recherche
+            if ((filteredBooksState.type.toLowerCase() === "tous les types" || filteredBooksState.type === "") && searchQuery === "") { // Si on veut tous les livres et qu'il n'y a pas de recherche
                 return filteredBooksState.books;
             }
+            else if ((filteredBooksState.type.toLowerCase() === "tous les types" || filteredBooksState.type === "") && searchQuery !== "") {
+
+                return book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    book.detail.author?.toLowerCase().includes(searchQuery.toLowerCase())
+            }
+
             else if (filteredBooksState.type !== "" && searchQuery === "") { // Sil y a un type sélectionné mais pas de recherche
                 return book.type.toLowerCase() === filteredBooksState.type.toLowerCase()
 
             }
             else if (filteredBooksState.type.toLowerCase() === "bd" && searchQuery !== "") {// Si y a un type  BD de sélectionné  qui n'est pas tous les livres et qu'on recherche  un dessinator
                 return book.detail.dessinator?.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                     book.type.toLowerCase() === filteredBooksState.type.toLowerCase()
+                    book.type.toLowerCase() === filteredBooksState.type.toLowerCase()
 
 
             } else if (filteredBooksState.type !== "" && filteredBooksState.type.toLowerCase() !== "tous les types" && searchQuery !== "") {// Si y a un type sélectionné et une recherche qui n'est pas tous les livres , qui n'est pas un bd et qu'on recherche un auteur ou un titre
-                return book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                return (book.title?.toLowerCase().includes(searchQuery.toLowerCase()) && book.type.toLowerCase() === filteredBooksState.type.toLowerCase()) ||
                     book.detail.author?.toLowerCase().includes(searchQuery.toLowerCase()) &&
                     (filteredBooksState.type.toLowerCase() !== "bd" && book.type.toLowerCase() === filteredBooksState.type.toLowerCase())
 
 
             }
-          
+
         }).sort((a, b) => b.prix - a.prix);
 
     }, [filteredBooksState, searchQuery]);
- 
+
 
     return (
         <div className={styles.container}>
@@ -145,10 +151,10 @@ export default function BooksPage() {
 
             <div className={styles.searchSelect}>
                 <select onChange={getValueSelect}>
-                    <option  defaultValue={"all"}>Tous les types</option>
+                    <option defaultValue={"all"}>Tous les types</option>
                     <option value="livre">Livre</option>
                     <option value="bd">BD</option>
-                    <option value="periodique">Périodique</option>
+                    <option value="périodique">Périodique</option>
 
                 </select>
             </div>
